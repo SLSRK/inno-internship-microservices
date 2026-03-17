@@ -28,11 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-/*@EnableAutoConfiguration(exclude = {
-        RedisAutoConfiguration.class,
-        RedisRepositoriesAutoConfiguration.class
-})
-@Import(TestCacheConfig.class)*/
 class IntegrationTest {
 
     @Container
