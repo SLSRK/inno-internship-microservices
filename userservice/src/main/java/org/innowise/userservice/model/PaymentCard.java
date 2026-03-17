@@ -32,7 +32,6 @@ public class PaymentCard {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
-    //private Long userId;
     private User user;
 
     @Column(name = "number", nullable = false, unique = true, length = 16)

@@ -6,15 +6,10 @@ import org.innowise.userservice.service.PaymentCardService;
 import org.innowise.userservice.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-
-//import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-//import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;

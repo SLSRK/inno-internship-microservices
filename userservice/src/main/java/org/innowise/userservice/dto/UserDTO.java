@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.innowise.userservice.model.PaymentCard;
 
 import java.io.Serializable;
 import java.time.LocalDate;
