@@ -114,6 +114,7 @@ public class PaymentCardServiceTest {
                 new PaymentCard(), new PaymentCard(), new PaymentCard()));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(paymentCardRepository.countByUserId(1L)).thenReturn(5L);
 
         assertThatThrownBy(() -> service.createCard(cardDTO))
                 .isInstanceOf(CardsQuantityException.class);
@@ -154,7 +155,10 @@ public class PaymentCardServiceTest {
     @Test
     void getPaymentCardsByUserId_shouldReturnActiveCards() {
         when(userRepository.findByIdWithCards(1L)).thenReturn(Optional.of(user));
-        when(paymentCardRepository.findByUserId(1L)).thenReturn(List.of(card));
+        card.setActive(true);
+        user.setCards(List.of(card));
+
+        when(userRepository.findByIdWithCards(1L)).thenReturn(Optional.of(user));
         when(paymentCardMapper.toDTO(card)).thenReturn(cardDTO);
 
         List<PaymentCardDTO> result = service.getPaymentCardsByUserId(1L);

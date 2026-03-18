@@ -40,7 +40,8 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     public PaymentCardDTO createCard(PaymentCardDTO paymentCardDTO){
         User user = userRepository.findById(paymentCardDTO.getUserId())
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        if(user.getCards().size() == 5) {
+
+        if (paymentCardRepository.countByUserId(user.getId()) >= 5) {
             throw new CardsQuantityException("This user already has 5 cards");
         }
         if(!user.getActive()){
@@ -87,10 +88,10 @@ public class PaymentCardServiceImpl implements PaymentCardService {
     }
 
     public List<PaymentCardDTO> getPaymentCardsByUserId(Long id){
-        userRepository.findByIdWithCards(id)
+        User user = userRepository.findByIdWithCards(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        return paymentCardRepository.findByUserId(id).stream()
+        return user.getCards().stream()
                 .filter(PaymentCard::getActive)
                 .map(paymentCardMapper::toDTO)
                 .toList();

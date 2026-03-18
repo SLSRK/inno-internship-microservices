@@ -15,9 +15,9 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
     List<User> findByName(String name);
 
     @Query("""
-    SELECT u FROM User u
-    LEFT JOIN FETCH u.cards c
-    WHERE u.id = :id AND (c IS NULL OR c.active = true)
+    SELECT DISTINCT u FROM User u
+    LEFT JOIN FETCH u.cards
+    WHERE u.id = :id
     """)
     Optional<User> findByIdWithCards(@Param("id") Long id);
 }

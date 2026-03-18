@@ -1,5 +1,6 @@
 package org.innowise.userservice.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class PaymentCardDTO implements Serializable {
     @Future(message = "Expiration date must be in the future")
     private LocalDate expirationDate;
 
+    @Valid
     private Boolean active;
 
     private LocalDateTime createdAt;

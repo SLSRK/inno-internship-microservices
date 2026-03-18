@@ -105,9 +105,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(notFound));
 
-        for(PaymentCard paymentCard : user.getCards()){
-            paymentCard.setActive(active);
-        }
+        paymentCardRepository.setActiveByUserId(id, active);
         user.setActive(active);
         return userMapper.toDTO(userRepository.save(user));
     }

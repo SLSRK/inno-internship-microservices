@@ -2,6 +2,7 @@ package org.innowise.userservice;
 
 import org.innowise.userservice.dto.UserDTO;
 import org.innowise.userservice.mapper.UserMapper;
+import org.innowise.userservice.repository.PaymentCardRepository;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,9 @@ import static org.mockito.Mockito.when;
 public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PaymentCardRepository paymentCardRepository;
 
     @Mock
     private UserMapper userMapper;
@@ -159,6 +163,6 @@ public class UserServiceTest {
 
         assertThat(result).isNotNull();
         assertThat(user.getActive()).isFalse();
-        assertThat(card.getActive()).isFalse();
+        verify(paymentCardRepository).setActiveByUserId(1L, false);
     }
 }
