@@ -76,6 +76,9 @@ jobs:
       #- name: Build before analysis
       #  run: mvn -B -f userservice/pom.xml clean install -DskipTests
 
+      - name: Build project before SonarCloud
+        run: mvn -B -f userservice/pom.xml clean compile -DskipTests
+
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
