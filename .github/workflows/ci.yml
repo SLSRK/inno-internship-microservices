@@ -73,8 +73,14 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Build before analysis
-        run: mvn -B -f userservice/pom.xml clean install -DskipTests
+      #- name: Build before analysis
+      #  run: mvn -B -f userservice/pom.xml clean install -DskipTests
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: userservice/target/site/jacoco
 
       - name: Run SonarCloud analysis
         env:
@@ -85,7 +91,9 @@ jobs:
             -Dsonar.organization=slsrk \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=${{ secrets.SONAR_TOKEN }} \
-            -Dsonar.java.binaries=target/classes
+            -Dsonar.java.binaries=target/classes \
+            -Dsonar.junit.reportPaths=target/surefire-reports \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
 
   docker_build:
