@@ -16,6 +16,7 @@ import org.innowise.userservice.specification.PaymentCardSpecification;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -99,7 +100,10 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Transactional
     @CachePut(value = "cards", key = "#id")
-    @CacheEvict(value = "users", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#result.userId + '_true'"),
+            @CacheEvict(value = "users", key = "#result.userId + '_false'")
+    })
     public PaymentCardDTO updatePaymentCard(Long id, PaymentCardDTO paymentCardDTO){
         PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(notFound));

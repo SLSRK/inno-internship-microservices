@@ -5,6 +5,7 @@ import org.innowise.userservice.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+
 @Mapper(componentModel = "spring", uses = {PaymentCardMapper.class})
 public interface UserMapper {
     @Mapping(target = "cards", ignore = true)

@@ -11,8 +11,9 @@ import org.innowise.userservice.repository.PaymentCardRepository;
 import org.innowise.userservice.repository.UserRepository;
 import org.innowise.userservice.service.UserService;
 import org.innowise.userservice.specification.UserSpecification;
-import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,6 @@ public class UserServiceImpl implements UserService {
     private final String notActive = "User not active";
 
     @Transactional
-    @CachePut(value = "users", key = "#result.id")
     public UserDTO createUser(UserDTO userDTO){
         User user = userMapper.toEntity(userDTO);
 
@@ -43,6 +43,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDTO(userRepository.save(user));
     }
 
+
     @Cacheable(value = "users", key = "#id + '_' + #withCards")
     public UserDTO getUserById(Long id, boolean withCards){
         User user;
@@ -50,6 +51,10 @@ public class UserServiceImpl implements UserService {
         if (withCards) {
             user = userRepository.findByIdWithCards(id)
                     .orElseThrow(() -> new NotFoundException(notFound));
+            user.setCards(
+                    user.getCards().stream()
+                            .filter(PaymentCard::getActive)
+                            .toList());
         } else {
             user = userRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException(notFound));
@@ -63,7 +68,7 @@ public class UserServiceImpl implements UserService {
                 : userMapper.toDTO(user);
     }
 
-    @Cacheable(value = "users")
+    @Cacheable(value = "users", key = "#name + '_' + #surname + '_' + #page + '_' + #size + '_' + #active")
     public Page<UserDTO> getAllUsers(String name, String surname, int page, int size, Boolean active) {
 
         Pageable pageable = PageRequest.of(page, size);
@@ -78,7 +83,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    @CachePut(value = "users", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#id + '_true'"),
+            @CacheEvict(value = "users", key = "#id + '_false'")
+    })
     public UserDTO updateUser(Long id, UserDTO userDTO){
         User user = userRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(notFound));
@@ -100,7 +108,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    @CachePut(value = "users", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#id + '_true'"),
+            @CacheEvict(value = "users", key = "#id + '_false'")
+    })
     public UserDTO setActive(Long id, boolean active){
         User user = userRepository.findById(id).
                 orElseThrow(() -> new NotFoundException(notFound));

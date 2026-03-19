@@ -49,7 +49,6 @@
         <createIndex tableName="payment_cards" indexName="idx_card_number">
             <column name="number"/>
         </createIndex>
-
     </changeSet>
 
 </databaseChangeLog>

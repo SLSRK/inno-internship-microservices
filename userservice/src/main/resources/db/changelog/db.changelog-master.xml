@@ -7,5 +7,6 @@
 
     <include file="db/changelog/create-users-table.xml"/>
     <include file="db/changelog/create-payment-cards-table.xml"/>
+    <include file="db/changelog/create-new-indexes.xml"/>
 
 </databaseChangeLog>
