@@ -7,10 +7,8 @@ import org.innowise.authservice.exception.PasswordException;
 import org.innowise.authservice.model.AuthUser;
 import org.innowise.authservice.model.Role;
 import org.innowise.authservice.repository.AuthUserRepository;
-import org.innowise.authservice.service.AuthService;
 import org.innowise.authservice.service.JwtService;
 import org.innowise.authservice.service.impl.AuthServiceImpl;
-import org.innowise.authservice.service.impl.JwtServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -64,7 +62,7 @@ public class AuthServiceTest {
         AuthUser saved = captor.getValue();
 
         assertThat(saved.getLogin()).isEqualTo("test@mail.com");
-        assertThat(saved.getPassword()).isEqualTo("hashed_pass"); // ключевая проверка
+        assertThat(saved.getPassword()).isEqualTo("hashed_pass");
         assertThat(saved.getRole()).isEqualTo(Role.ROLE_USER);
         assertThat(saved.getUserId()).isEqualTo(1L);
     }

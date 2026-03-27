@@ -51,7 +51,6 @@ public class AuthServiceImpl implements AuthService {
         Long userId = jwtService.extractUserId(refreshToken);
 
         AuthUser user = authUserRepository.findByUserId(userId)
-        //AuthUser user = authUserRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         String newAccessToken = jwtService.createAccessToken(userId, user.getRole());
