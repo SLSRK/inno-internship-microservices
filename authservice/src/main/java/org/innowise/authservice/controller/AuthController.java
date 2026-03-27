@@ -1,11 +1,7 @@
 package org.innowise.authservice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.innowise.authservice.dto.AuthResponseDTO;
-import org.innowise.authservice.dto.LoginRequestDTO;
-import org.innowise.authservice.dto.RefreshRequestDTO;
-import org.innowise.authservice.dto.RegisterRequestDTO;
-import org.innowise.authservice.dto.ValidateRequestDTO;
+import org.innowise.authservice.dto.*;
 import org.innowise.authservice.service.AuthService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public boolean validate(@RequestBody ValidateRequestDTO token){
-        return authService.validate(token.getAccessToken());
+    public ValidateResponseDTO validate(@RequestBody ValidateRequestDTO token){
+        return authService.validate(token.getToken());
     }
 }

@@ -9,5 +9,5 @@ import lombok.Getter;
 public class ValidateRequestDTO {
 
     @NotBlank(message = "Token cannot be empty")
-    private String accessToken;
+    private String token;
 }

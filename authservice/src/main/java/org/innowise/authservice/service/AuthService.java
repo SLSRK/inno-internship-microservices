@@ -3,6 +3,7 @@ package org.innowise.authservice.service;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 
 public interface AuthService {
 
@@ -31,5 +32,5 @@ public interface AuthService {
      * @param token access token;
      * @return returns access token is valid or not.
      */
-    boolean validate(String token);
+    ValidateResponseDTO validate(String token);
 }

@@ -3,6 +3,7 @@ package org.innowise.authservice;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.exception.PasswordException;
 import org.innowise.authservice.model.AuthUser;
 import org.innowise.authservice.model.Role;
@@ -122,17 +123,17 @@ public class AuthServiceTest {
     void validate_shouldReturnTrue_whenTokenValid() {
         when(jwtService.validateToken("valid")).thenReturn(mock(io.jsonwebtoken.Claims.class));
 
-        boolean result = authService.validate("valid");
+        ValidateResponseDTO result = authService.validate("valid");
 
-        assertThat(result).isTrue();
+        assertThat(result.getIsValid()).isTrue();
     }
 
     @Test
     void validate_shouldReturnFalse_whenException() {
         when(jwtService.validateToken("bad")).thenThrow(new RuntimeException());
 
-        boolean result = authService.validate("bad");
+        ValidateResponseDTO result = authService.validate("bad");
 
-        assertThat(result).isFalse();
+        assertThat(result.getIsValid()).isFalse();
     }
 }

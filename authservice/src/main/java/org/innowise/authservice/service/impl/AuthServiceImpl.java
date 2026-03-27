@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.exception.NotFoundException;
 import org.innowise.authservice.exception.PasswordException;
 import org.innowise.authservice.model.AuthUser;
@@ -58,13 +59,13 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponseDTO(newAccessToken, refreshToken);
     }
 
-    public boolean validate(String token){
+    public ValidateResponseDTO validate(String token){
         try{
             jwtService.validateToken(token);
-            return true;
+            return new ValidateResponseDTO(true);
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return new ValidateResponseDTO(false);
         }
     }
 }

@@ -3,6 +3,7 @@ package org.innowise.authservice;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.repository.AuthUserRepository;
 import org.innowise.authservice.service.AuthService;
 import org.junit.jupiter.api.Test;
@@ -105,16 +106,16 @@ public class IntegrationTest {
                 new LoginRequestDTO("val@mail.com", "password")
         );
 
-        boolean valid = authService.validate(tokens.getAccessToken());
+        ValidateResponseDTO valid = authService.validate(tokens.getAccessToken());
 
-        assertThat(valid).isTrue();
+        assertThat(valid.getIsValid()).isTrue();
     }
 
     @Test
     void shouldReturnFalseForInvalidToken() {
-        boolean valid = authService.validate("invalid.token.here");
+        ValidateResponseDTO valid = authService.validate("invalid.token.here");
 
-        assertThat(valid).isFalse();
+        assertThat(valid.getIsValid()).isFalse();
     }
 
     @Test
