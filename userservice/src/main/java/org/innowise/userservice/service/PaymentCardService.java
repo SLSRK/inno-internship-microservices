@@ -20,7 +20,7 @@ public interface PaymentCardService {
      * @param id ID of the card to get;
      * @return returns the card if it exists.
      */
-    PaymentCardDTO getPaymentCardById(Long id);
+    PaymentCardDTO getPaymentCardById(Long id, Long userId, boolean isUser);
 
     /**
      * Retrieves a paginated list of payment cards with optional filtering;
@@ -57,5 +57,5 @@ public interface PaymentCardService {
      * @param active new state to be uploaded;
      * @return returns the result of changing the card's state.
      */
-    PaymentCardDTO setActive(Long id, boolean active);
+    PaymentCardDTO setActive(Long id, boolean active, Long userId, boolean isUser);
 }

@@ -3,9 +3,11 @@ package org.innowise.userservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.innowise.userservice.dto.UserDTO;
+import org.innowise.userservice.exception.AccessDeniedException;
 import org.innowise.userservice.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,14 +26,34 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO){
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO,
+                                              Authentication authentication){
+        Long currentUserId = (Long) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if(!isAdmin){
+            throw new AccessDeniedException("Access denied");
+        }
+
         return ResponseEntity.ok(userService.createUser(userDTO));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUser(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "false") boolean withCards){
+            @RequestParam(defaultValue = "false") boolean withCards,
+            Authentication authentication){
+        Long currentUserId = (Long) authentication.getPrincipal();
+        boolean isUser = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isUser && !isAdmin && !currentUserId.equals(id)) {
+            throw new AccessDeniedException("Access denied");
+        }
         return ResponseEntity.ok(userService.getUserById(id, withCards));
     }
 
@@ -41,7 +63,15 @@ public class UserController {
             @RequestParam(required = false) String surname,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) Boolean active){
+            @RequestParam(required = false) Boolean active,
+            Authentication authentication){
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if(!isAdmin){
+            throw new AccessDeniedException("Access denied");
+        }
 
         return ResponseEntity.ok(userService.getAllUsers(name, surname, page, size, active));
     }
@@ -49,14 +79,36 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserDTO userDTO){
+            @Valid @RequestBody UserDTO userDTO,
+            Authentication authentication){
+        Long currentUserId = (Long) authentication.getPrincipal();
+        boolean isUser = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isUser && !isAdmin && !currentUserId.equals(id)) {
+            throw new AccessDeniedException("Access denied");
+        }
         return ResponseEntity.ok(userService.updateUser(id, userDTO));
     }
 
     @PatchMapping("/{id}/active")
     public ResponseEntity<UserDTO> activateUser(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "true") boolean active){
+            @RequestParam(defaultValue = "true") boolean active,
+            Authentication authentication){
+        Long currentUserId = (Long) authentication.getPrincipal();
+        boolean isUser = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isUser && !isAdmin && !currentUserId.equals(id)) {
+            throw new AccessDeniedException("Access denied");
+        }
         return ResponseEntity.ok(userService.setActive(id, active));
     }
 }

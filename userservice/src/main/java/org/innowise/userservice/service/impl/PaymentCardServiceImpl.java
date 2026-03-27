@@ -3,6 +3,7 @@ package org.innowise.userservice.service.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.innowise.userservice.dto.PaymentCardDTO;
+import org.innowise.userservice.exception.AccessDeniedException;
 import org.innowise.userservice.exception.CardsQuantityException;
 import org.innowise.userservice.exception.NotActiveException;
 import org.innowise.userservice.exception.NotFoundException;
@@ -60,9 +61,13 @@ public class PaymentCardServiceImpl implements PaymentCardService {
         return paymentCardMapper.toDTO(savedPaymentCard);
     }
 
-    public PaymentCardDTO getPaymentCardById(Long id){
+    public PaymentCardDTO getPaymentCardById(Long id, Long userId, boolean isUser){
         PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(notFound));
+
+        if(paymentCard.getUser().getId() != userId && isUser){
+            throw new AccessDeniedException("Access denied");
+        }
 
         if(!paymentCard.getActive()) {
             throw new RuntimeException(notActive);
@@ -116,9 +121,13 @@ public class PaymentCardServiceImpl implements PaymentCardService {
 
     @Transactional
     @CachePut(value = "cards", key = "#id")
-    public PaymentCardDTO setActive(Long id, boolean active){
+    public PaymentCardDTO setActive(Long id, boolean active, Long userId, boolean isUser){
         PaymentCard paymentCard = paymentCardRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(notFound));
+
+        if(paymentCard.getUser().getId() != userId && isUser){
+            throw new AccessDeniedException("Access denied");
+        }
 
         paymentCard.setActive(active);
         return paymentCardMapper.toDTO(paymentCardRepository.save(paymentCard));

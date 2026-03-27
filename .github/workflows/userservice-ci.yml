@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: CI Pipeline (userservice)
 
 on:
   push:
@@ -72,9 +72,6 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-
-      #- name: Build before analysis
-      #  run: mvn -B -f userservice/pom.xml clean install -DskipTests
 
       - name: Build project before SonarCloud
         run: mvn -B -f userservice/pom.xml clean compile -DskipTests

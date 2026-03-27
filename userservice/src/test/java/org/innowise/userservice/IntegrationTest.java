@@ -90,7 +90,7 @@ class IntegrationTest {
 
         assertThat(savedCard.getId()).isNotNull();
 
-        PaymentCardDTO foundCard = paymentCardService.getPaymentCardById(savedCard.getId());
+        PaymentCardDTO foundCard = paymentCardService.getPaymentCardById(savedCard.getId(), savedUser.getId(), false);
 
         assertThat(foundCard.getNumber()).isEqualTo("1111999922220000");
         assertThat(foundCard.getHolder()).isEqualTo("Ivan Slesarenko");

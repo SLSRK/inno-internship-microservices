@@ -1,6 +1,6 @@
 services:
 
-  app:
+  userservice:
     build: ./userservice
     container_name: userservice
     ports:
@@ -16,6 +16,19 @@ services:
       - db
       - redis
 
+  authservice:
+    build: ./authservice
+    container_name: authservice
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authservice
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - auth-db
+
   db:
     image: postgres:16
     container_name: userservice_db
@@ -29,6 +42,19 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
+  auth-db:
+    image: postgres:16
+    container_name: authservice_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: authservice
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
+
   redis:
     image: redis:7
     container_name: userservice_redis
@@ -38,3 +64,4 @@ services:
 
 volumes:
   db_data:
+  auth_db_data:

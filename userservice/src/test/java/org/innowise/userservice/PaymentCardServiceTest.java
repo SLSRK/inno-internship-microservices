@@ -125,7 +125,7 @@ public class PaymentCardServiceTest {
         when(paymentCardRepository.findById(1L)).thenReturn(Optional.of(card));
         when(paymentCardMapper.toDTO(card)).thenReturn(cardDTO);
 
-        PaymentCardDTO result = service.getPaymentCardById(1L);
+        PaymentCardDTO result = service.getPaymentCardById(1L, 1L, false);
 
         assertThat(result).isNotNull();
     }
@@ -135,7 +135,7 @@ public class PaymentCardServiceTest {
         card.setActive(false);
         when(paymentCardRepository.findById(1L)).thenReturn(Optional.of(card));
 
-        assertThatThrownBy(() -> service.getPaymentCardById(1L))
+        assertThatThrownBy(() -> service.getPaymentCardById(1L, 1L, false))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -185,7 +185,7 @@ public class PaymentCardServiceTest {
         when(paymentCardRepository.save(any())).thenReturn(card);
         when(paymentCardMapper.toDTO(card)).thenReturn(cardDTO);
 
-        PaymentCardDTO result = service.setActive(1L, false);
+        PaymentCardDTO result = service.setActive(1L, false, 1L, false);
 
         assertThat(result).isNotNull();
         assertThat(card.getActive()).isFalse();
