@@ -29,6 +29,19 @@ services:
     depends_on:
       - auth-db
 
+  orderservice:
+    build: ./orderservice
+    container_name: orderservice
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/orderservice
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    depends_on:
+      - order-db
+
   db:
     image: postgres:16
     container_name: userservice_db
@@ -55,6 +68,19 @@ services:
     volumes:
       - auth_db_data:/var/lib/postgresql/data
 
+  order-db:
+    image: postgres:16
+    container_name: orderservice_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: orderservice
+    ports:
+      - "5434:5432"
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+
   redis:
     image: redis:7
     container_name: userservice_redis
@@ -65,3 +91,4 @@ services:
 volumes:
   db_data:
   auth_db_data:
+  order_db_data:

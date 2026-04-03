@@ -37,5 +37,5 @@ public class AuthUser {
     private Role role;
 
     @Column(unique = true, nullable = false)
-    private  Long userId;
+    private Long userId;
 }
