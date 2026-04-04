@@ -27,7 +27,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +62,7 @@ public class OrderServiceImpl implements OrderService {
 
                     return entity;
                 })
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
 
         order.setTotalPrice(orderItems.stream()
                 .mapToLong(item -> item.getItem().getPrice() * item.getQuantity())

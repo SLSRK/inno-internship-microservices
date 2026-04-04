@@ -6,6 +6,8 @@ import org.innowise.orderservice.model.Item;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.Locale;
+
 @Mapper(componentModel = "spring")
 public interface ItemMapper {
 
@@ -16,6 +18,6 @@ public interface ItemMapper {
 
     default String mapPrice(Long priceInCents) {
         if (priceInCents == null) return null;
-        return String.format("%.2f", priceInCents / 100.0);
+        return String.format(Locale.US,"%.2f", priceInCents / 100.0);
     }
 }

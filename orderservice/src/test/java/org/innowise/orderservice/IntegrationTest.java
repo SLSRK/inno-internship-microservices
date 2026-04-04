@@ -81,7 +81,7 @@ public class IntegrationTest {
         assertThat(responseItem.getQuantity()).isEqualTo(2L);
         assertThat(responseItem.getItem().getId()).isEqualTo(item.getId());
         assertThat(responseItem.getItem().getName()).isEqualTo("Test Item");
-        assertThat(responseItem.getItem().getPrice()).isEqualTo("1,00");
+        assertThat(responseItem.getItem().getPrice()).isEqualTo("1.00");
     }
 
     @Test
