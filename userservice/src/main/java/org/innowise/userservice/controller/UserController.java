@@ -57,6 +57,18 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id, withCards));
     }
 
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserDTO> getUserByEmail( @PathVariable String email,
+                                                   Authentication authentication){
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if(!isAdmin){
+            throw new AccessDeniedException("Access denied");
+        }
+        return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
+
     @GetMapping
     public ResponseEntity<Page<UserDTO>> getAllUsers(
             @RequestParam(required = false) String name,

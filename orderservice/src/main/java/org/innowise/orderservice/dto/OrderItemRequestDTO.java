@@ -1,13 +1,13 @@
 package org.innowise.orderservice.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class OrderItemRequestDTO {
 
     Long orderId;

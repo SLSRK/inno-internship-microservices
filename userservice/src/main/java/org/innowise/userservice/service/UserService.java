@@ -23,6 +23,14 @@ public interface UserService {
     UserDTO getUserById(Long id, boolean withCards);
 
     /**
+     * Get an existing user by email;
+     *
+     * @param email email of the user to get;
+     * @return returns the user if it exists.
+     */
+    UserDTO getUserByEmail(String email);
+
+    /**
      * Retrieves a paginated list of users with optional filtering;
      *
      * @param name optional  name to filter results;

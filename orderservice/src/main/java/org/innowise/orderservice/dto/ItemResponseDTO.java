@@ -13,7 +13,7 @@ public class ItemResponseDTO {
 
     String name;
 
-    Long price;
+    String price;
 
     LocalDateTime createdAt;
 

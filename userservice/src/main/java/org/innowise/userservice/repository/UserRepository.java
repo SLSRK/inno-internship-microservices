@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User,Long>, JpaSpecificati
     WHERE u.id = :id
     """)
     Optional<User> findByIdWithCards(@Param("id") Long id);
+
+    Optional<User> findByEmail(@Param("email") String email);
 }

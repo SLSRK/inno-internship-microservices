@@ -11,7 +11,14 @@ import org.innowise.orderservice.service.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -80,6 +87,20 @@ public class OrderController {
         }
 
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+    }
+
+    @PostMapping("/email/{email}")
+    public ResponseEntity<List<OrderResponseDTO>> getOrdersByUserEmail(@PathVariable String email,
+                                                                    Authentication authentication){
+        Long currentUserId = (Long) authentication.getPrincipal();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new AccessDeniedException("Access denied");
+        }
+
+        return ResponseEntity.ok(orderService.getOrdersByUserEmail(email));
     }
 
     @PutMapping("/{id}")

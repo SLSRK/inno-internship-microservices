@@ -27,9 +27,6 @@ public class Item {
     @Column(nullable = false, length = 100)
     private String name;
 
-    //@Column(name = "price", precision = 19, scale = 2, nullable = false)
-    //private BigDecimal price;
-
     @Column(nullable = false)
     private Long price;
 

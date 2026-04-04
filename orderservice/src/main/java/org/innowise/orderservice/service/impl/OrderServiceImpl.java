@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.innowise.orderservice.dto.OrderRequestDTO;
 import org.innowise.orderservice.dto.OrderResponseDTO;
 import org.innowise.orderservice.dto.OrderUpdateDTO;
+import org.innowise.orderservice.dto.UserResponseDTO;
 import org.innowise.orderservice.exception.AccessDeniedException;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.mapper.OrderItemMapper;
@@ -17,6 +18,7 @@ import org.innowise.orderservice.repository.ItemRepository;
 import org.innowise.orderservice.repository.OrderItemRepository;
 import org.innowise.orderservice.repository.OrderRepository;
 import org.innowise.orderservice.service.OrderService;
+import org.innowise.orderservice.service.UserService;
 import org.innowise.orderservice.specification.OrderSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +39,8 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
+
+    private final UserService userService;
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
@@ -67,7 +71,9 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);
 
         savedOrder.setOrderItems(orderItems);
-        return orderMapper.toDTO(savedOrder);
+        OrderResponseDTO savedOrderDTO = orderMapper.toDTO(savedOrder);
+        savedOrderDTO.setUser(userService.getUserById(order.getUserId()));
+        return savedOrderDTO;
     }
 
     public OrderResponseDTO getOrderById(Long id, Long currentUserId, boolean isUser){
@@ -76,7 +82,9 @@ public class OrderServiceImpl implements OrderService {
 
         if(isUser && currentUserId != order.getUserId()) throw  new AccessDeniedException("Access denied");
 
-        return orderMapper.toDTO(order);
+        OrderResponseDTO orderDTO = orderMapper.toDTO(order);
+        orderDTO.setUser(userService.getUserById(order.getUserId()));
+        return orderDTO;
     }
 
     public Page<OrderResponseDTO> getAllOrders(
@@ -96,14 +104,36 @@ public class OrderServiceImpl implements OrderService {
                 .and(OrderSpecification.createdBefore(to));
 
         return orderRepository.findAll(spec, pageable)
-                .map(orderMapper::toDTO);
+                .map(order -> {
+                    OrderResponseDTO dto = orderMapper.toDTO(order);
+                    dto.setUser(userService.getUserById(order.getUserId()));
+                    return dto;
+                });
     }
 
     public List<OrderResponseDTO> getOrdersByUserId(Long userId){
-        return orderRepository.findByUserIdAndDeletedFalse(userId)
+        List <OrderResponseDTO> ordersDTO = orderRepository.findByUserIdAndDeletedFalse(userId)
                 .stream()
                 .map(orderMapper::toDTO)
                 .toList();
+        if(ordersDTO.isEmpty()){
+            throw new NotFoundException("No orders found");
+        }
+        ordersDTO.getLast().setUser(userService.getUserById(userId));
+        return ordersDTO;
+    }
+
+    public List<OrderResponseDTO> getOrdersByUserEmail(String email){
+        UserResponseDTO user = userService.getUserByEmail(email);
+        List <OrderResponseDTO> ordersDTO = orderRepository.findByUserIdAndDeletedFalse(user.getId())
+                .stream()
+                .map(orderMapper::toDTO)
+                .toList();
+        if(ordersDTO.isEmpty()){
+            throw new NotFoundException("No orders found");
+        }
+        ordersDTO.getLast().setUser(user);
+        return ordersDTO;
     }
 
     @Transactional
@@ -111,31 +141,35 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
+
         order.setUserId(orderUpdateDTO.getUserId());
         order.setStatus(OrderStatus.valueOf(orderUpdateDTO.getStatus()));
 
         order.getOrderItems().clear();
-        List<OrderItem> newItems = orderUpdateDTO.getOrderItems().stream()
-                .map(dto -> {
-                    OrderItem entity = orderItemMapper.toEntity(dto);
-                    entity.setOrder(order);
+        orderUpdateDTO.getOrderItems().forEach(dto -> {
+            OrderItem entity = orderItemMapper.toEntity(dto);
+            entity.setOrder(order);
 
-                    Item item = itemRepository.findById(dto.getItemId())
-                            .orElseThrow(() -> new NotFoundException("Item not found"));
-                    entity.setItem(item);
+            Item item = itemRepository.findById(dto.getItemId())
+                    .orElseThrow(() -> new NotFoundException("Item not found"));
+            entity.setItem(item);
 
-                    return entity;
-                })
-                .toList();
+            order.getOrderItems().add(entity);
+        });
 
-        order.getOrderItems().addAll(newItems);
+        order.setTotalPrice(order.getOrderItems().stream()
+                .mapToLong(item -> item.getItem().getPrice() * item.getQuantity())
+                .sum());
 
-        return orderMapper.toDTO(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+        OrderResponseDTO orderDTO = orderMapper.toDTO(savedOrder);
+        orderDTO.setUser(userService.getUserById(order.getUserId()));
+        return orderDTO;
     }
 
     public OrderResponseDTO deleteOrderById(Long id){
         Order order = orderRepository.findByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException("Order not found"));
         order.setDeleted(true);
 
         return orderMapper.toDTO(orderRepository.save(order));

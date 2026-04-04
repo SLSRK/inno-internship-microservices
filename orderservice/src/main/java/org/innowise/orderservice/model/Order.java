@@ -1,7 +1,6 @@
 package org.innowise.orderservice.model;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -26,9 +25,6 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
-
-    //@Column(name = "total_price", precision = 19, scale = 2, nullable = false)
-    //private BigDecimal totalPrice;
 
     @Column(name = "total_price", nullable = false)
     private Long totalPrice;

@@ -68,6 +68,16 @@ public class UserServiceImpl implements UserService {
                 : userMapper.toDTO(user);
     }
 
+    @Cacheable(value = "users", key = "#email")
+    public UserDTO getUserByEmail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(notFound));
+        if(!user.getActive()){
+            throw new RuntimeException(notActive);
+        }
+        return userMapper.toDTO(user);
+    }
+
     @Cacheable(value = "users", key = "#name + '_' + #surname + '_' + #page + '_' + #size + '_' + #active")
     public Page<UserDTO> getAllUsers(String name, String surname, int page, int size, Boolean active) {
 

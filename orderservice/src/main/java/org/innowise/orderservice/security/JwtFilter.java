@@ -42,10 +42,9 @@ public class JwtFilter  extends OncePerRequestFilter {
 
             var auth = new UsernamePasswordAuthenticationToken(
                     userId,
-                    null,
+                    token,
                     List.of(new SimpleGrantedAuthority("ROLE_" + role))
             );
-
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
