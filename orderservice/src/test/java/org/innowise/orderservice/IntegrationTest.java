@@ -7,23 +7,27 @@ import org.innowise.orderservice.model.OrderStatus;
 import org.innowise.orderservice.repository.ItemRepository;
 import org.innowise.orderservice.service.OrderService;
 import org.innowise.orderservice.service.UserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -37,12 +41,19 @@ public class IntegrationTest {
             .withUsername("test")
             .withPassword("test");
 
+    @Container
+    static GenericContainer<?> wiremock = new GenericContainer<>(
+            DockerImageName.parse("wiremock/wiremock:2.35.0"))
+            .withExposedPorts(8080);
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("user.service.url", () ->
+                "http://" + wiremock.getHost() + ":" + wiremock.getMappedPort(8080));
     }
 
     @Autowired
@@ -53,6 +64,27 @@ public class IntegrationTest {
 
     @Autowired
     private UserService userService;
+
+    @BeforeEach
+    void setupWireMock() {
+        configureFor(wiremock.getHost(), wiremock.getMappedPort(8080));
+
+        stubFor(get(urlEqualTo("/api/users/1"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                {
+                  "id": 1,
+                  "name": "Mock",
+                  "surname": "User",
+                  "birthDate": "2001-01-01",
+                  "active": true,
+                  "email": "mock@mail.com",
+                  "createdAt": "2026-01-01T00:00:00",
+                  "updatedAt": "2026-01-01T00:00:00"
+                }
+            """)));
+    }
 
     @Test
     void shouldCreateAndGetOrder() {
@@ -132,25 +164,5 @@ public class IntegrationTest {
         OrderResponseDTO deletedOrder = orderService.deleteOrderById(savedOrder.getId());
 
         assertThat(deletedOrder.getDeleted()).isTrue();
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public UserService userService() {
-            return new UserService() {
-                @Override
-                public UserResponseDTO getUserById(Long id) {
-                    return new UserResponseDTO(id, "Mock", "User", LocalDate.now(),
-                            true, "null@mail.com", LocalDateTime.now(), LocalDateTime.now());
-                }
-
-                @Override
-                public UserResponseDTO getUserByEmail(String email) {
-                    return new UserResponseDTO(1L, "Mock", "User", LocalDate.now(),
-                            true, "null@mail.com", LocalDateTime.now(), LocalDateTime.now());
-                }
-            };
-        }
     }
 }

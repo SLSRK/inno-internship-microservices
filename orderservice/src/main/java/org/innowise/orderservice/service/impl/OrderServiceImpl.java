@@ -2,6 +2,7 @@ package org.innowise.orderservice.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.innowise.orderservice.dto.OrderItemRequestDTO;
 import org.innowise.orderservice.dto.OrderRequestDTO;
 import org.innowise.orderservice.dto.OrderResponseDTO;
 import org.innowise.orderservice.dto.OrderUpdateDTO;
@@ -50,23 +51,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderMapper.toEntity(orderRequestDTO);
         order.setStatus(OrderStatus.STATUS_PENDING);
 
-        List<OrderItem> orderItems = orderRequestDTO.getOrderItems().stream()
-                .map(dto -> {
-                    OrderItem entity = orderItemMapper.toEntity(dto);
-                    entity.setOrder(order);
-
-                    Item item = itemRepository.findById(dto.getItemId())
-                            .orElseThrow(() -> new NotFoundException(
-                                    "Item with id: " + dto.getItemId() + " not found"));
-                    entity.setItem(item);
-
-                    return entity;
-                })
-                .collect(Collectors.toCollection(ArrayList::new));
-
-        order.setTotalPrice(orderItems.stream()
-                .mapToLong(item -> item.getItem().getPrice() * item.getQuantity())
-                .sum());
+        List<OrderItem> orderItems = mapOrderItems(orderRequestDTO.getOrderItems(),order);
+        order.setTotalPrice(calcTotalPrice(orderItems));
         order.setDeleted(false);
         Order savedOrder = orderRepository.save(order);
 
@@ -143,25 +129,14 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
-
         order.setUserId(orderUpdateDTO.getUserId());
         order.setStatus(OrderStatus.valueOf(orderUpdateDTO.getStatus()));
 
+        List<OrderItem> orderItems = mapOrderItems(orderUpdateDTO.getOrderItems(), order);
+
         order.getOrderItems().clear();
-        orderUpdateDTO.getOrderItems().forEach(dto -> {
-            OrderItem entity = orderItemMapper.toEntity(dto);
-            entity.setOrder(order);
-
-            Item item = itemRepository.findById(dto.getItemId())
-                    .orElseThrow(() -> new NotFoundException("Item not found"));
-            entity.setItem(item);
-
-            order.getOrderItems().add(entity);
-        });
-
-        order.setTotalPrice(order.getOrderItems().stream()
-                .mapToLong(item -> item.getItem().getPrice() * item.getQuantity())
-                .sum());
+        order.getOrderItems().addAll(orderItems);
+        order.setTotalPrice(calcTotalPrice(order.getOrderItems()));
 
         Order savedOrder = orderRepository.save(order);
         OrderResponseDTO orderDTO = orderMapper.toDTO(savedOrder);
@@ -169,11 +144,34 @@ public class OrderServiceImpl implements OrderService {
         return orderDTO;
     }
 
+    @Transactional
     public OrderResponseDTO deleteOrderById(Long id){
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         order.setDeleted(true);
 
         return orderMapper.toDTO(orderRepository.save(order));
+    }
+
+    private List<OrderItem> mapOrderItems(List<OrderItemRequestDTO> dtos, Order order) {
+        return dtos.stream()
+                .map(dto -> {
+                    OrderItem entity = orderItemMapper.toEntity(dto);
+                    entity.setOrder(order);
+
+                    Item item = itemRepository.findById(dto.getItemId())
+                            .orElseThrow(() -> new NotFoundException(
+                                    "Item with id: " + dto.getItemId() + " not found"));
+
+                    entity.setItem(item);
+                    return entity;
+                })
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private Long calcTotalPrice(List<OrderItem> orderItems){
+        return orderItems.stream()
+                .mapToLong(item -> item.getItem().getPrice() * item.getQuantity())
+                .sum();
     }
 }

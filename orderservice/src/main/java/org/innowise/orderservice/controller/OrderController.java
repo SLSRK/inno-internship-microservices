@@ -11,6 +11,7 @@ import org.innowise.orderservice.service.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -44,7 +45,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(orderRequestDTO));
     }
 
-    @PostMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id,
                                                          Authentication authentication){
         Long currentUserId = (Long) authentication.getPrincipal();
@@ -74,7 +75,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getAllOrders(statuses, from, to, page, size));
     }
 
-    @PostMapping("/user/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<OrderResponseDTO>> getOrdersByUserId(@PathVariable Long userId,
                                                                     Authentication authentication){
         Long currentUserId = (Long) authentication.getPrincipal();
@@ -89,7 +90,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
     }
 
-    @PostMapping("/email/{email}")
+    @GetMapping("/email/{email}")
     public ResponseEntity<List<OrderResponseDTO>> getOrdersByUserEmail(@PathVariable String email,
                                                                     Authentication authentication){
         Long currentUserId = (Long) authentication.getPrincipal();
@@ -118,7 +119,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateOrderById(id, orderUpdateDTO));
     }
 
-    @PutMapping("/{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity<OrderResponseDTO> deleteOrderById(@PathVariable Long id,
                                                             Authentication authentication){
         boolean isAdmin = authentication.getAuthorities().stream()
