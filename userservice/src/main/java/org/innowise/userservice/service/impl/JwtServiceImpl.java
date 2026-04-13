@@ -3,17 +3,22 @@ package org.innowise.userservice.service.impl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 import org.innowise.userservice.service.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 
 @Service
-@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    private final SecretKey secretKey = Keys.hmacShaKeyFor("auth-secret-key-for-json-web-token-service-123456".getBytes());
+    private final SecretKey secretKey;
+
+    public JwtServiceImpl(
+            @Value("${jwt.secret}") String secret
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     public Claims validate(String token){
         return Jwts.parser()

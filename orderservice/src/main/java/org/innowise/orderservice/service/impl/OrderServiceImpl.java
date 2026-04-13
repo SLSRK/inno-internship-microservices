@@ -22,6 +22,7 @@ import org.innowise.orderservice.service.OrderService;
 import org.innowise.orderservice.service.UserService;
 import org.innowise.orderservice.specification.OrderSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,10 +47,16 @@ public class OrderServiceImpl implements OrderService {
 
     private final UserService userService;
 
-    @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
-
         Order order = orderMapper.toEntity(orderRequestDTO);
+
+        OrderResponseDTO savedOrderDTO = createOrderTransaction(order, orderRequestDTO);
+        savedOrderDTO.setUser(userService.getUserById(order.getUserId()));
+        return savedOrderDTO;
+    }
+
+    @Transactional
+    private OrderResponseDTO createOrderTransaction(Order order, OrderRequestDTO orderRequestDTO){
         order.setStatus(OrderStatus.STATUS_PENDING);
 
         List<OrderItem> orderItems = mapOrderItems(orderRequestDTO.getOrderItems(),order);
@@ -59,9 +67,7 @@ public class OrderServiceImpl implements OrderService {
         orderItemRepository.saveAll(orderItems);
 
         savedOrder.setOrderItems(orderItems);
-        OrderResponseDTO savedOrderDTO = orderMapper.toDTO(savedOrder);
-        savedOrderDTO.setUser(userService.getUserById(order.getUserId()));
-        return savedOrderDTO;
+        return orderMapper.toDTO(savedOrder);
     }
 
     public OrderResponseDTO getOrderById(Long id, Long currentUserId, boolean isUser){
@@ -91,12 +97,31 @@ public class OrderServiceImpl implements OrderService {
                 .and(OrderSpecification.createdAfter(from))
                 .and(OrderSpecification.createdBefore(to));
 
-        return orderRepository.findAll(spec, pageable)
-                .map(order -> {
-                    OrderResponseDTO dto = orderMapper.toDTO(order);
-                    dto.setUser(userService.getUserById(order.getUserId()));
-                    return dto;
-                });
+        Page<Order> orderPage = orderRepository.findAll(spec, pageable);
+
+        List<OrderResponseDTO> orders = orderPage.getContent().stream()
+                .map(orderMapper::toDTO)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        List<UserResponseDTO> users = userService.getUsersByIds(orders.stream()
+                .map(order -> order.getUserId()).toList());
+
+        Map<Long, UserResponseDTO> userMap = users.stream()
+                .collect(Collectors.toMap(UserResponseDTO::getId,
+                        u -> u,
+                        (existing, duplicate) -> existing));
+
+        orders.forEach(o -> o.setUser(
+                userMap.getOrDefault(
+                        o.getUserId(),
+                        UserResponseDTO.builder()
+                                .id(o.getUserId())
+                                .name("Unknown")
+                                .build()
+                )
+        ));
+
+        return new PageImpl<>(orders, pageable, orderPage.getTotalElements());
     }
 
     public List<OrderResponseDTO> getOrdersByUserId(Long userId){
@@ -124,11 +149,17 @@ public class OrderServiceImpl implements OrderService {
         return ordersDTO;
     }
 
-    @Transactional
     public OrderResponseDTO updateOrderById(Long id, OrderUpdateDTO orderUpdateDTO){
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
+        OrderResponseDTO orderDTO = updateOrderTransaction(order, orderUpdateDTO);
+        orderDTO.setUser(userService.getUserById(order.getUserId()));
+        return orderDTO;
+    }
+
+    @Transactional
+    private OrderResponseDTO updateOrderTransaction(Order order, OrderUpdateDTO orderUpdateDTO){
         order.setUserId(orderUpdateDTO.getUserId());
         order.setStatus(OrderStatus.valueOf(orderUpdateDTO.getStatus()));
 
@@ -139,9 +170,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalPrice(calcTotalPrice(order.getOrderItems()));
 
         Order savedOrder = orderRepository.save(order);
-        OrderResponseDTO orderDTO = orderMapper.toDTO(savedOrder);
-        orderDTO.setUser(userService.getUserById(order.getUserId()));
-        return orderDTO;
+        return orderMapper.toDTO(savedOrder);
     }
 
     @Transactional

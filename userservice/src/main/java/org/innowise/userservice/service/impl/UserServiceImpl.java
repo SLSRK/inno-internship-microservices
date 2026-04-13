@@ -20,6 +20,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -66,6 +70,15 @@ public class UserServiceImpl implements UserService {
         return withCards
                 ? userMapper.toDTOWithCards(user)
                 : userMapper.toDTO(user);
+    }
+
+    @Cacheable(value = "users", key = "#ids")
+    public List<UserDTO> getUsersByIds(List<Long> ids){
+        return userRepository.findAllById(ids).stream()
+                .filter(u -> u.getActive())
+                .map(userMapper :: toDTO)
+                .distinct()
+                .collect(Collectors.toCollection(ArrayList:: new));
     }
 
     @Cacheable(value = "users", key = "#email")

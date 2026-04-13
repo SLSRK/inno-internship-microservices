@@ -3,6 +3,8 @@ package org.innowise.userservice.service;
 import org.innowise.userservice.dto.UserDTO;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public interface UserService {
 
     /**
@@ -29,6 +31,14 @@ public interface UserService {
      * @return returns the user if it exists.
      */
     UserDTO getUserByEmail(String email);
+
+    /**
+     * Get existing users by IDs;
+     *
+     * @param ids IDs of the users to get;
+     * @return returns the list of users if they exist.
+     */
+    List<UserDTO> getUsersByIds(List<Long> ids);
 
     /**
      * Retrieves a paginated list of users with optional filtering;

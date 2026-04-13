@@ -12,6 +12,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
+      JWT_SECRET: auth-secret-key-for-json-web-token-service-123456
     depends_on:
       - db
       - redis
@@ -26,6 +27,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authservice
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: auth-secret-key-for-json-web-token-service-123456
     depends_on:
       - auth-db
 
@@ -39,6 +41,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://order-db:5432/orderservice
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: auth-secret-key-for-json-web-token-service-123456
     depends_on:
       - order-db
 

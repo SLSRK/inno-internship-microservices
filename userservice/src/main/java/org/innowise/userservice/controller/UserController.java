@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -67,6 +69,18 @@ public class UserController {
             throw new AccessDeniedException("Access denied");
         }
         return ResponseEntity.ok(userService.getUserByEmail(email));
+    }
+
+    @GetMapping("/batch/{ids}")
+    public ResponseEntity<List<UserDTO>> getUsersByIds(@PathVariable List<Long> ids,
+                                                 Authentication authentication){
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if(!isAdmin){
+            throw new AccessDeniedException("Access denied");
+        }
+        return ResponseEntity.ok(userService.getUsersByIds(ids));
     }
 
     @GetMapping

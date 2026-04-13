@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.innowise.authservice.model.Role;
 import org.innowise.authservice.service.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -13,7 +14,13 @@ import java.util.Date;
 @Service
 public class JwtServiceImpl implements JwtService {
 
-    private final SecretKey secretKey = Keys.hmacShaKeyFor("auth-secret-key-for-json-web-token-service-123456".getBytes());
+    private final SecretKey secretKey;
+
+    public JwtServiceImpl(
+            @Value("${jwt.secret}") String secret
+    ) {
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     private final long accessExpiration = 1000 * 60 * 15;
     private final long refreshExpiration = 1000 * 60 * 60 * 24;

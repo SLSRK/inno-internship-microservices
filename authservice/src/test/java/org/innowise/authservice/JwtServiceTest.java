@@ -23,7 +23,8 @@ public class JwtServiceTest {
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtServiceImpl();
+        String secret = "auth-secret-key-for-json-web-token-service-123456";
+        jwtService = new JwtServiceImpl(secret);
     }
 
     @Test
