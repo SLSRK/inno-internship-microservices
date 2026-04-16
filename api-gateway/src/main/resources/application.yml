@@ -1,0 +1,71 @@
+server:
+  port: 8080
+
+spring:
+  cloud:
+    compatibility-verifier:
+      enabled: false
+    gateway:
+      routes:
+        - id: userservice
+          uri: http://userservice:8080
+          predicates:
+            - Path=/userservice/**
+          filters:
+            - RewritePath=/userservice/(?<segment>.*), /${segment}
+
+        - id: orderservice
+          uri: http://orderservice:8080
+          predicates:
+            - Path=/orderservice/**
+          filters:
+            - RewritePath=/orderservice/(?<segment>.*), /${segment}
+
+        - id: authservice
+          uri: http://authservice:8080
+          predicates:
+            - Path=/authservice/**
+          filters:
+            - RewritePath=/authservice/(?<segment>.*), /${segment}
+
+        - id: userservice-docs
+          uri: http://userservice:8080
+          predicates:
+            - Path=/userservice/v3/api-docs
+          filters:
+            - RewritePath=/userservice/v3/api-docs, /v3/api-docs
+
+        - id: orderservice-docs
+          uri: http://orderservice:8080
+          predicates:
+            - Path=/orderservice/v3/api-docs
+          filters:
+            - RewritePath=/orderservice/v3/api-docs, /v3/api-docs
+
+        - id: authservice-docs
+          uri: http://authservice:8080
+          predicates:
+            - Path=/authservice/v3/api-docs
+          filters:
+            - RewritePath=/authservice/v3/api-docs, /v3/api-docs
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: userservice
+        url: /userservice/v3/api-docs
+      - name: orderservice
+        url: /orderservice/v3/api-docs
+      - name: authservice
+        url: /authservice/v3/api-docs
