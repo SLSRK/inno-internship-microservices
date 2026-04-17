@@ -2,6 +2,7 @@ package org.innowise.api_gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -15,16 +16,22 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(formLogin -> formLogin.disable())
-/*                .authorizeExchange(auth -> auth
+                .authorizeExchange(ex -> ex
                         .pathMatchers(
-                                "/auth/**",
-                                "/swagger-ui/**",
+                                "/authservice/auth/login",
+                                "/authservice/auth/register",
+
+                                "/authservice/v3/api-docs",
+                                "/userservice/v3/api-docs",
+                                "/orderservice/v3/api-docs",
+
                                 "/v3/api-docs/**",
-                                "/actuator/**"
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
                         ).permitAll()
-                        .anyExchange()
-                        .permitAll())*/
-                .authorizeExchange(ex -> ex.anyExchange().permitAll())
+                        .anyExchange().authenticated())
+                //.authorizeExchange(ex -> ex.anyExchange().authenticated())
+                .oauth2ResourceServer(oauth -> oauth.jwt(Customizer.withDefaults()))
                 .build();
     }
 }

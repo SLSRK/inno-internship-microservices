@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -123,17 +125,20 @@ public class AuthServiceTest {
     void validate_shouldReturnTrue_whenTokenValid() {
         when(jwtService.validateToken("valid")).thenReturn(mock(io.jsonwebtoken.Claims.class));
 
-        ValidateResponseDTO result = authService.validate("valid");
+        //ValidateResponseDTO result = authService.validate("valid");
+        Boolean result = authService.validate("valid");
 
-        assertThat(result.getIsValid()).isTrue();
+        //assertThat(result.getIsValid()).isTrue();
+        assertTrue(result);
     }
 
     @Test
     void validate_shouldReturnFalse_whenException() {
         when(jwtService.validateToken("bad")).thenThrow(new RuntimeException());
 
-        ValidateResponseDTO result = authService.validate("bad");
+        //ValidateResponseDTO result = authService.validate("bad");
+        Boolean result = authService.validate("bad");
 
-        assertThat(result.getIsValid()).isFalse();
+        assertFalse(result);
     }
 }

@@ -59,13 +59,13 @@ public class AuthServiceImpl implements AuthService {
         return new AuthResponseDTO(newAccessToken, refreshToken);
     }
 
-    public ValidateResponseDTO validate(String token){
+    public boolean validate(String token){
         try{
             jwtService.validateToken(token);
-            return new ValidateResponseDTO(true);
+            return true; //new ValidateResponseDTO(true);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ValidateResponseDTO(false);
+            return false; //new ValidateResponseDTO(false);
         }
     }
 }

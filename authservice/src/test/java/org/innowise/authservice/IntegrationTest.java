@@ -18,6 +18,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Testcontainers
@@ -106,16 +108,20 @@ public class IntegrationTest {
                 new LoginRequestDTO("val@mail.com", "password")
         );
 
-        ValidateResponseDTO valid = authService.validate(tokens.getAccessToken());
+        //ValidateResponseDTO valid = authService.validate(tokens.getAccessToken());
+        Boolean valid = authService.validate(tokens.getAccessToken());
 
-        assertThat(valid.getIsValid()).isTrue();
+        //assertThat(valid.getIsValid()).isTrue();
+        assertTrue(valid);
     }
 
     @Test
     void shouldReturnFalseForInvalidToken() {
-        ValidateResponseDTO valid = authService.validate("invalid.token.here");
+        //ValidateResponseDTO valid = authService.validate("invalid.token.here");
+        Boolean valid = authService.validate("invalid.token.here");
 
-        assertThat(valid.getIsValid()).isFalse();
+        //assertThat(valid.getIsValid()).isFalse();
+        assertFalse(valid);
     }
 
     @Test

@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/validate")
-    public ValidateResponseDTO validate(@RequestBody ValidateRequestDTO token){
+    public boolean validate(@RequestBody ValidateRequestDTO token){
         return authService.validate(token.getToken());
     }
 }
