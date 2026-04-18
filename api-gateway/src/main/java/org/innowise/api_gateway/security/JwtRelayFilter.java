@@ -6,8 +6,6 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
@@ -42,12 +40,6 @@ public class JwtRelayFilter implements GlobalFilter, Ordered {
         }
 
         String token = authHeader.substring(7);
-
-        /*if (!jwtFilter.isTokenValid(token)) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
-        }*/
-
         return jwtDecoder.decode(token)
                 .flatMap(jwt -> chain.filter(exchange))
                 .onErrorResume(e -> {
