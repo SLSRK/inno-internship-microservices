@@ -4,6 +4,7 @@ import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
 import org.innowise.authservice.dto.UserDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.exception.PasswordException;
 import org.innowise.authservice.model.AuthUser;
 import org.innowise.authservice.model.Role;
@@ -27,8 +28,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -156,20 +155,17 @@ public class AuthServiceTest {
     void validate_shouldReturnTrue_whenTokenValid() {
         when(jwtService.validateToken("valid")).thenReturn(mock(io.jsonwebtoken.Claims.class));
 
-        //ValidateResponseDTO result = authService.validate("valid");
-        Boolean result = authService.validate("valid");
+        ValidateResponseDTO result = authService.validate("valid");
 
-        //assertThat(result.getIsValid()).isTrue();
-        assertTrue(result);
+        assertThat(result.getIsValid()).isTrue();
     }
 
     @Test
     void validate_shouldReturnFalse_whenException() {
         when(jwtService.validateToken("bad")).thenThrow(new RuntimeException());
 
-        //ValidateResponseDTO result = authService.validate("bad");
-        Boolean result = authService.validate("bad");
+        ValidateResponseDTO result = authService.validate("bad");
 
-        assertFalse(result);
+        assertThat(result.getIsValid()).isFalse();
     }
 }

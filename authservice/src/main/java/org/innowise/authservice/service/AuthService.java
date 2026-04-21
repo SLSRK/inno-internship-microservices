@@ -32,5 +32,5 @@ public interface AuthService {
      * @param token access token;
      * @return returns access token is valid or not.
      */
-    boolean validate(String token);
+    ValidateResponseDTO validate(String token);
 }

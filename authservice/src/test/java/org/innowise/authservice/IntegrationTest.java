@@ -4,6 +4,7 @@ import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
 import org.innowise.authservice.dto.UserDTO;
+import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.repository.AuthUserRepository;
 import org.innowise.authservice.service.AuthService;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +28,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Java6Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Testcontainers
@@ -146,20 +145,16 @@ public class IntegrationTest {
                 new LoginRequestDTO("val@mail.com", "password")
         );
 
-        //ValidateResponseDTO valid = authService.validate(tokens.getAccessToken());
-        Boolean valid = authService.validate(tokens.getAccessToken());
+        ValidateResponseDTO valid = authService.validate(tokens.getAccessToken());
 
-        //assertThat(valid.getIsValid()).isTrue();
-        assertTrue(valid);
+        assertThat(valid.getIsValid()).isTrue();
     }
 
     @Test
     void shouldReturnFalseForInvalidToken() {
-        //ValidateResponseDTO valid = authService.validate("invalid.token.here");
-        Boolean valid = authService.validate("invalid.token.here");
+        ValidateResponseDTO valid = authService.validate("invalid.token.here");
 
-        //assertThat(valid.getIsValid()).isFalse();
-        assertFalse(valid);
+        assertThat(valid.getIsValid()).isFalse();
     }
 
     @Test
