@@ -24,4 +24,6 @@ public class RegisterRequestDTO {
             message = "Role must be ROLE_USER or ROLE_ADMIN"
     )
     String role;
+
+    UserDTO userDTO;
 }

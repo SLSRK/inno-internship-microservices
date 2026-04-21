@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final RestTemplate restTemplate;
-    private final String userServiceUrl = "http://userservice:8081";
+    private final String userServiceUrl = "http://userservice:8080";
 
     @CircuitBreaker(name = "userService", fallbackMethod = "fallBackUserEmail")
     public UserResponseDTO getUserByEmail(String email) {
