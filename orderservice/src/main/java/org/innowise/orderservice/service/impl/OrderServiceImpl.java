@@ -50,8 +50,13 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
         Order order = orderMapper.toEntity(orderRequestDTO);
 
+        UserResponseDTO userResponseDTO = userService.getUserById(order.getUserId());
+        if(userResponseDTO.getName() == "Unknown" && userResponseDTO.getSurname() == null){
+            throw new NotFoundException("User not found");
+        }
+
         OrderResponseDTO savedOrderDTO = createOrderTransaction(order, orderRequestDTO);
-        savedOrderDTO.setUser(userService.getUserById(order.getUserId()));
+        savedOrderDTO.setUser(userResponseDTO);
         return savedOrderDTO;
     }
 
@@ -153,8 +158,13 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
+        UserResponseDTO userResponseDTO = userService.getUserById(orderUpdateDTO.getUserId());
+        if(userResponseDTO.getName() == "Unknown" && userResponseDTO.getSurname() == null){
+            throw new NotFoundException("User not found");
+        }
+
         OrderResponseDTO orderDTO = updateOrderTransaction(order, orderUpdateDTO);
-        orderDTO.setUser(userService.getUserById(order.getUserId()));
+        orderDTO.setUser(userResponseDTO);
         return orderDTO;
     }
 
