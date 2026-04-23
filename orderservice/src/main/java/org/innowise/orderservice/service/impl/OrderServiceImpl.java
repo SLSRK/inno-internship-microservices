@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderMapper.toEntity(orderRequestDTO);
 
         UserResponseDTO userResponseDTO = userService.getUserById(order.getUserId());
-        if(userResponseDTO.getName() == "Unknown" && userResponseDTO.getSurname() == null){
+        if( "Unknown".equals(userResponseDTO.getName()) && userResponseDTO.getSurname() == null){
             throw new NotFoundException("User not found");
         }
 
@@ -159,7 +159,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
 
         UserResponseDTO userResponseDTO = userService.getUserById(orderUpdateDTO.getUserId());
-        if(userResponseDTO.getName() == "Unknown" && userResponseDTO.getSurname() == null){
+        if("Unknown".equals(userResponseDTO.getName()) && userResponseDTO.getSurname() == null){
             throw new NotFoundException("User not found");
         }
 

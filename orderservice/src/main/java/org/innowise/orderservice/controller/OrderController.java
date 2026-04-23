@@ -9,6 +9,7 @@ import org.innowise.orderservice.exception.AccessDeniedException;
 import org.innowise.orderservice.model.OrderStatus;
 import org.innowise.orderservice.service.OrderService;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,8 +60,8 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrders(
             @RequestParam(required = false) List<OrderStatus> statuses,
-            @RequestParam(required = false) LocalDateTime from,
-            @RequestParam(required = false) LocalDateTime to,
+            @DateTimeFormat LocalDateTime from,
+            @DateTimeFormat LocalDateTime to,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             Authentication authentication

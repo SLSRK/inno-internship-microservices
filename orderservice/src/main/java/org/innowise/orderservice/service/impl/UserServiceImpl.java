@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.innowise.orderservice.dto.UserResponseDTO;
 import org.innowise.orderservice.exception.NotFoundException;
 import org.innowise.orderservice.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,7 +19,8 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final RestTemplate restTemplate;
-    private final String userServiceUrl = "http://userservice:8080";
+    @Value("${user.service.url}")
+    private String userServiceUrl;
 
     @CircuitBreaker(name = "userService", fallbackMethod = "fallBackUserEmail")
     public UserResponseDTO getUserByEmail(String email) {
