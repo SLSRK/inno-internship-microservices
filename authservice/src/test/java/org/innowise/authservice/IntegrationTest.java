@@ -3,9 +3,11 @@ package org.innowise.authservice;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.UserDTO;
 import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.repository.AuthUserRepository;
 import org.innowise.authservice.service.AuthService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,10 +15,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 @SpringBootTest
@@ -24,12 +34,16 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 @ActiveProfiles("test")
 public class IntegrationTest {
 
-
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
             .withDatabaseName("auth_test")
             .withUsername("test")
             .withPassword("test");
+
+    @Container
+    static GenericContainer<?> wiremock = new GenericContainer<>(
+            DockerImageName.parse("wiremock/wiremock:2.35.0"))
+            .withExposedPorts(8080);
 
     @DynamicPropertySource
     static void configure(DynamicPropertyRegistry registry) {
@@ -37,6 +51,8 @@ public class IntegrationTest {
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+        registry.add("user.service.url", () ->
+                "http://" + wiremock.getHost() + ":" + wiremock.getMappedPort(8080));
     }
 
     @Autowired
@@ -48,13 +64,34 @@ public class IntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @BeforeEach
+    void setupWireMock() {
+        repository.deleteAll();
+        configureFor(wiremock.getHost(), wiremock.getMappedPort(8080));
+
+        stubFor(post(urlEqualTo("/api/users"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("""
+                {
+                  "id": 1,
+                  "name": "Mock",
+                  "surname": "User",
+                  "birthDate": "2001-01-01",
+                  "active": true,
+                  "email": "mock@mail.com"
+                }
+            """)));
+    }
+
     @Test
     void shouldRegisterUser() {
         RegisterRequestDTO request = new RegisterRequestDTO(
                 "test@mail.com",
                 "password",
                 1L,
-                "ROLE_USER"
+                "ROLE_USER",
+                new UserDTO()
         );
 
         authService.register(request);
@@ -74,7 +111,8 @@ public class IntegrationTest {
                 "login@mail.com",
                 "password",
                 2L,
-                "ROLE_USER"
+                "ROLE_USER",
+                new UserDTO()
         );
 
         authService.register(register);
@@ -97,7 +135,8 @@ public class IntegrationTest {
                 "val@mail.com",
                 "password",
                 3L,
-                "ROLE_USER"
+                "ROLE_USER",
+                new UserDTO()
         );
 
         authService.register(register);
@@ -124,7 +163,8 @@ public class IntegrationTest {
                 "refresh@mail.com",
                 "password",
                 4L,
-                "ROLE_USER"
+                "ROLE_USER",
+                new UserDTO()
         );
 
         authService.register(register);

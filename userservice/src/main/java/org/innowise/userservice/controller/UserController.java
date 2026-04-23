@@ -30,12 +30,13 @@ public class UserController {
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO,
                                               Authentication authentication){
-        Long currentUserId = (Long) authentication.getPrincipal();
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (authentication != null) {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        if(!isAdmin){
-            throw new AccessDeniedException("Access denied");
+            if (!isAdmin) {
+                throw new AccessDeniedException("Access denied");
+            }
         }
 
         return ResponseEntity.ok(userService.createUser(userDTO));

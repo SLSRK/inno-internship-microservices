@@ -3,6 +3,7 @@ package org.innowise.authservice;
 import org.innowise.authservice.dto.AuthResponseDTO;
 import org.innowise.authservice.dto.LoginRequestDTO;
 import org.innowise.authservice.dto.RegisterRequestDTO;
+import org.innowise.authservice.dto.UserDTO;
 import org.innowise.authservice.dto.ValidateResponseDTO;
 import org.innowise.authservice.exception.PasswordException;
 import org.innowise.authservice.model.AuthUser;
@@ -10,6 +11,7 @@ import org.innowise.authservice.model.Role;
 import org.innowise.authservice.repository.AuthUserRepository;
 import org.innowise.authservice.service.JwtService;
 import org.innowise.authservice.service.impl.AuthServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,14 +21,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -41,8 +48,22 @@ public class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private RestTemplate restTemplate;
+
     @InjectMocks
     private AuthServiceImpl authService;
+
+    @BeforeEach
+    void setUp() {
+        authService = new AuthServiceImpl(
+                repository,
+                passwordEncoder,
+                jwtService,
+                restTemplate
+        );
+        ReflectionTestUtils.setField(authService, "userServiceUrl", "http://mock");
+    }
 
     @Test
     void register_shouldHashPasswordAndSaveUser() {
@@ -50,11 +71,22 @@ public class AuthServiceTest {
                 "test@mail.com",
                 "password",
                 1L,
-                "ROLE_USER"
+                "ROLE_USER",
+                new UserDTO()
         );
 
         when(passwordEncoder.encode("password")).thenReturn("hashed_pass");
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1L);
 
+        when(restTemplate.postForObject(
+                anyString(),
+                any(),
+                eq(UserDTO.class),
+                any(Object[].class)
+        )).thenReturn(userDTO);
+
+        ReflectionTestUtils.setField(authService, "userServiceUrl", "http://localhost");
         authService.register(request);
 
         ArgumentCaptor<AuthUser> captor = ArgumentCaptor.forClass(AuthUser.class);

@@ -1,19 +1,20 @@
 package org.innowise.authservice.service.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.innowise.authservice.dto.AuthResponseDTO;
-import org.innowise.authservice.dto.LoginRequestDTO;
-import org.innowise.authservice.dto.RegisterRequestDTO;
-import org.innowise.authservice.dto.ValidateResponseDTO;
+import org.innowise.authservice.dto.*;
 import org.innowise.authservice.exception.NotFoundException;
 import org.innowise.authservice.exception.PasswordException;
+import org.innowise.authservice.exception.RegistrationException;
 import org.innowise.authservice.model.AuthUser;
 import org.innowise.authservice.model.Role;
 import org.innowise.authservice.repository.AuthUserRepository;
 import org.innowise.authservice.service.AuthService;
 import org.innowise.authservice.service.JwtService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -23,14 +24,29 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private final RestTemplate restTemplate;
+    @Value("${user.service.url}")
+    private String userServiceUrl;
+
+    @Transactional
     public void register(RegisterRequestDTO registerRequestDTO) {
         AuthUser newUser = new AuthUser();
 
         newUser.setLogin(registerRequestDTO.getLogin());
         newUser.setPassword(passwordEncoder.encode(registerRequestDTO.getPassword()));
         newUser.setRole(Role.valueOf(registerRequestDTO.getRole()));
-        newUser.setUserId(registerRequestDTO.getUserId());
 
+        UserDTO userDTO = registerRequestDTO.getUserDTO();
+        UserDTO usrResponseDTO;
+
+        try {
+            String url = userServiceUrl + "/api/users";
+            usrResponseDTO = restTemplate.postForObject(url, userDTO, UserDTO.class);
+
+        } catch (Exception e) {
+            throw new RegistrationException("Registration failed:" + e);
+        }
+        newUser.setUserId(usrResponseDTO.getId());
         authUserRepository.save(newUser);
     }
 

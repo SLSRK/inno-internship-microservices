@@ -38,6 +38,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDTO createUser(UserDTO userDTO){
         User user = userMapper.toEntity(userDTO);
+        user.setId(null);
 
         if(user.getCards() != null){
             for(PaymentCard paymentCard : user.getCards()){
