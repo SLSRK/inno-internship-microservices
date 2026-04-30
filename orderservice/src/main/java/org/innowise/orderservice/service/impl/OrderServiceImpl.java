@@ -192,6 +192,14 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toDTO(orderRepository.save(order));
     }
 
+    @Transactional
+    public void setStatus(Long orderId, OrderStatus status){
+        Order order = orderRepository.findByIdAndDeletedFalse(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(status);
+        orderRepository.save(order);
+    }
+
     private List<OrderItem> mapOrderItems(List<OrderItemRequestDTO> dtos, Order order) {
         return dtos.stream()
                 .map(dto -> {
