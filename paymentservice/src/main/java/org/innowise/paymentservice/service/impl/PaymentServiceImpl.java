@@ -5,6 +5,7 @@ import org.innowise.paymentservice.dto.PaymentRequestDTO;
 import org.innowise.paymentservice.dto.PaymentResponseDTO;
 import org.innowise.paymentservice.dto.PaymentStatusDTO;
 import org.innowise.paymentservice.dto.TotalSumResponseDTO;
+import org.innowise.paymentservice.exception.AccessDeniedException;
 import org.innowise.paymentservice.exception.NotFoundException;
 import org.innowise.paymentservice.mapper.PaymentMapper;
 import org.innowise.paymentservice.model.Payment;
@@ -49,9 +50,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Transactional
-    public PaymentResponseDTO pay(String paymentId){
+    public PaymentResponseDTO pay(String paymentId, Long currentUserId, boolean isUser){
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new NotFoundException("Payment not found"));
+
+        if(isUser && currentUserId != payment.getUserId()){
+            throw new AccessDeniedException("Access denied");
+        }
 
         if(externalApiService.getRandomNumber() % 2 == 0){
             payment.setStatus(PaymentStatus.STATUS_SUCCESS);

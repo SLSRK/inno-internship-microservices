@@ -37,7 +37,7 @@ public interface OrderService {
      * @param to optional maximum order date to filter results;
      * @param page optional flag to filter orders by active status;
      * @param size the number of records per page (must be > 0);
-     * @return the orders, that who match the given criteria.
+     * @return the orders, that match the given criteria.
      */
     Page<OrderResponseDTO> getAllOrders(
             List<OrderStatus> statuses,
