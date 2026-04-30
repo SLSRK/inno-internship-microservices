@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 public class KafkaService {
     private final OrderService orderService;
 
+    /**
+     * Get message with payment status;
+     *
+     * @param message DTO with order ID and payment status.
+     */
     @KafkaListener(
             topics = "payment-status",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consume(PaymentStatusDTO message) {
-        System.out.println("KAFKA MESSAGE: " + message);
         if ("STATUS_SUCCESS".equals(message.getStatus())) {
             orderService.setStatus(message.getOrderId(), OrderStatus.STATUS_PAID);
         }
