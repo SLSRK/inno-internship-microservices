@@ -13,6 +13,6 @@ public class KafkaServiceImpl implements KafkaService {
     private final KafkaTemplate<String, PaymentStatusDTO> kafkaTemplate;
 
     public void sendPaymentEvent(PaymentStatusDTO message) {
-        kafkaTemplate.send("payment-status", message.getOrderId().toString(), message);
+        kafkaTemplate.send("payment.cdc.status-changed", message.getOrderId().toString(), message);
     }
 }

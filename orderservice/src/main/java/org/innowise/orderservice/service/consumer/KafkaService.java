@@ -13,12 +13,12 @@ public class KafkaService {
     private final OrderService orderService;
 
     /**
-     * Get message with payment status;
+     * Consumer for getting messages with payment status;
      *
      * @param message DTO with order ID and payment status.
      */
     @KafkaListener(
-            topics = "payment-status",
+            topics = "payment.cdc.status-changed",
             containerFactory = "kafkaListenerContainerFactory"
     )
     public void consume(PaymentStatusDTO message) {
