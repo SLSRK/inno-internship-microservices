@@ -37,7 +37,7 @@ public interface OrderService {
      * @param to optional maximum order date to filter results;
      * @param page optional flag to filter orders by active status;
      * @param size the number of records per page (must be > 0);
-     * @return the orders, that who match the given criteria.
+     * @return the orders, that match the given criteria.
      */
     Page<OrderResponseDTO> getAllOrders(
             List<OrderStatus> statuses,
@@ -79,4 +79,12 @@ public interface OrderService {
      * @return returns full data of the deleted order.
      */
     OrderResponseDTO deleteOrderById(Long id);
+
+    /**
+     * Update order status by ID;
+     *
+     * @param orderId ID of the order to be updated;
+     * @param status new order status;
+     */
+    void setStatus(Long orderId, OrderStatus status);
 }

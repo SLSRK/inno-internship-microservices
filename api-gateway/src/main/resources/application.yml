@@ -28,6 +28,13 @@ spring:
           filters:
             - RewritePath=/authservice/(?<segment>.*), /${segment}
 
+        - id: paymentservice
+          uri: http://paymentservice:8080
+          predicates:
+            - Path=/paymentservice/**
+          filters:
+            - RewritePath=/paymentservice/(?<segment>.*), /${segment}
+
         - id: userservice-docs
           uri: http://userservice:8080
           predicates:
@@ -49,6 +56,13 @@ spring:
           filters:
             - RewritePath=/authservice/v3/api-docs, /v3/api-docs
 
+        - id: paymentservice-docs
+          uri: http://paymentservice:8080
+          predicates:
+            - Path=/paymentservice/v3/api-docs
+          filters:
+            - RewritePath=/paymentservice/v3/api-docs, /v3/api-docs
+
 
 management:
   endpoints:
@@ -69,3 +83,5 @@ springdoc:
         url: /orderservice/v3/api-docs
       - name: authservice
         url: /authservice/v3/api-docs
+      - name: paymentservice
+        url: /paymentservice/v3/api-docs

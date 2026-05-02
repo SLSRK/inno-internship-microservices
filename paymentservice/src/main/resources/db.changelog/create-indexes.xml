@@ -1,0 +1,49 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:mongodb="http://www.liquibase.org/xml/ns/mongodb"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd
+        http://www.liquibase.org/xml/ns/mongodb
+        http://www.liquibase.org/xml/ns/mongodb/liquibase-mongodb.xsd">
+
+    <changeSet id="2-create-indexes" author="slsrk">
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { "order_id": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "idx_order_id" }
+            </mongodb:options>
+        </mongodb:createIndex>
+
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { "user_id": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "idx_user_id" }
+            </mongodb:options>
+        </mongodb:createIndex>
+
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { "status": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "idx_status" }
+            </mongodb:options>
+        </mongodb:createIndex>
+
+        <mongodb:createIndex collectionName="payments">
+            <mongodb:keys>
+                { "timestamp": 1 }
+            </mongodb:keys>
+            <mongodb:options>
+                { "name": "idx_timestamp" }
+            </mongodb:options>
+        </mongodb:createIndex>
+    </changeSet>
+
+</databaseChangeLog>
