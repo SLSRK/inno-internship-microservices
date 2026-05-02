@@ -26,6 +26,6 @@ class KafkaServiceTest {
 
         kafkaService.sendPaymentEvent(dto);
 
-        verify(kafkaTemplate).send("payment-status", "1", dto);
+        verify(kafkaTemplate).send("payment.cdc.status-changed", "1", dto);
     }
 }

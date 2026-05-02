@@ -124,7 +124,7 @@ class IntegrationTest {
         payment = paymentRepository.save(payment);
 
         Consumer<String, String> consumer = kafkaConsumer();
-        consumer.subscribe(List.of("payment-status"));
+        consumer.subscribe(List.of("payment.cdc.status-changed"));
 
         paymentService.pay(payment.getId(), 1L, true);
 
